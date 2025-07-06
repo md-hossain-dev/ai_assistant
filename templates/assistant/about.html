@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - AI Assistant</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .about-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 40px;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header-section h1 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .tech-stack {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .tech-item {
+            display: inline-block;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="about-container">
+            <div class="header-section">
+                <h1><i class="fas fa-robot me-3"></i>AI Assistant</h1>
+                <p class="lead">A Professional AI Chat Assistant Powered by DeepSeek</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4>Advanced AI Model</h4>
+                        <p>Powered by DeepSeek AI, one of the most advanced language models available. Capable of understanding and responding to complex queries with high accuracy.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h4>Programming Expert</h4>
+                        <p>Specialized in programming languages, debugging, code review, and software development best practices. Get help with Python, JavaScript, Java, and more.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h4>Conversation History</h4>
+                        <p>All conversations are saved and can be retrieved later. Maintain context across sessions for better user experience.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Secure & Private</h4>
+                        <p>Your conversations are stored securely with proper session management. No data is shared with third parties.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tech-stack">
+                <h4 class="mb-3"><i class="fas fa-cogs me-2"></i>Technology Stack</h4>
+                <div class="tech-item">Django</div>
+                <div class="tech-item">Python</div>
+                <div class="tech-item">HuggingFace Transformers</div>
+                <div class="tech-item">DeepSeek AI</div>
+                <div class="tech-item">Bootstrap</div>
+                <div class="tech-item">JavaScript</div>
+                <div class="tech-item">SQLite</div>
+                <div class="tech-item">REST API</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="fas fa-list-check me-2"></i>Key Features</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Real-time chat interface</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Session management</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Conversation history</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Response time tracking</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Token usage monitoring</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Error handling</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Professional UI/UX</li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4><i class="fas fa-info-circle me-2"></i>Model Information</h4>
+                    <div id="modelInfo">
+                        <p><strong>Model:</strong> <span id="modelName">Loading...</span></p>
+                        <p><strong>Max Tokens:</strong> <span id="maxTokens">Loading...</span></p>
+                        <p><strong>Status:</strong> <span id="modelStatus">Loading...</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="/" class="btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Chat
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Load model information
+        fetch('/api/model-info/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('modelName').textContent = data.model_name;
+                document.getElementById('maxTokens').textContent = data.max_tokens;
+                document.getElementById('modelStatus').textContent = data.is_loaded ? 'Loaded' : 'Not Loaded';
+                document.getElementById('modelStatus').className = data.is_loaded ? 'text-success' : 'text-danger';
+            })
+            .catch(error => {
+                console.error('Error loading model info:', error);
+                document.getElementById('modelName').textContent = 'Error loading';
+                document.getElementById('maxTokens').textContent = 'Error loading';
+                document.getElementById('modelStatus').textContent = 'Error';
+                document.getElementById('modelStatus').className = 'text-danger';
+            });
+    </script>
+</body>
+</html>
