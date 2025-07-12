@@ -1,9 +1,11 @@
 import time
 import logging
+import os
 from typing import Optional, Dict, Any
 from django.conf import settings
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 import torch
+from .classifier import cybersecurity_classifier
 
 logger = logging.getLogger(__name__)
 
@@ -14,15 +16,24 @@ class AIService:
     def __init__(self):
         self.model_name = settings.AI_MODEL_NAME
         self.max_new_tokens = settings.MAX_NEW_TOKENS
+        self.use_openai = os.getenv('USE_OPENAI', 'True').lower() == 'true'  # Default to OpenAI
+        self.openai_api_key = os.getenv('OPENAI_API_KEY')
+        self.openai_model = os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo')
+        
+        # Local model components
         self.pipe = None
         self.tokenizer = None
         self.model = None
-        self._initialize_model()
+        
+        if not self.use_openai:
+            self._initialize_local_model()
+        else:
+            self._initialize_openai()
     
-    def _initialize_model(self):
-        """Initialize the AI model and tokenizer"""
+    def _initialize_local_model(self):
+        """Initialize the local AI model and tokenizer"""
         try:
-            logger.info(f"Initializing AI model: {self.model_name}")
+            logger.info(f"Initializing local AI model: {self.model_name}")
             
             # Initialize the pipeline for text generation
             self.pipe = pipeline(
@@ -33,10 +44,24 @@ class AIService:
                 trust_remote_code=True
             )
             
-            logger.info("AI model initialized successfully")
+            logger.info("Local AI model initialized successfully")
             
         except Exception as e:
-            logger.error(f"Error initializing AI model: {str(e)}")
+            logger.error(f"Error initializing local AI model: {str(e)}")
+            raise
+    
+    def _initialize_openai(self):
+        """Initialize OpenAI client"""
+        try:
+            if not self.openai_api_key:
+                raise ValueError("OpenAI API key not found in environment variables")
+            
+            import openai
+            self.openai_client = openai.OpenAI(api_key=self.openai_api_key)
+            logger.info("OpenAI client initialized successfully")
+            
+        except Exception as e:
+            logger.error(f"Error initializing OpenAI: {str(e)}")
             raise
     
     def generate_response(self, user_message: str, max_tokens: Optional[int] = None) -> Dict[str, Any]:
@@ -53,10 +78,85 @@ class AIService:
         start_time = time.time()
         
         try:
-            # Prepare the prompt
-            prompt = self._prepare_prompt(user_message)
+            # First, classify the query
+            classification = cybersecurity_classifier.classify_query(user_message)
             
-            # Generate response
+            if not classification['is_cybersecurity']:
+                # Return rejection message for non-cybersecurity queries
+                response_time = time.time() - start_time
+                return {
+                    'response': cybersecurity_classifier.get_rejection_message(),
+                    'response_time': response_time,
+                    'tokens_used': 0,
+                    'model_name': 'classification_rejection',
+                    'classification': classification,
+                    'is_cybersecurity': False
+                }
+            
+            # Generate cybersecurity-specific response
+            if self.use_openai:
+                ai_response = self._generate_openai_response(user_message, classification, max_tokens)
+            else:
+                ai_response = self._generate_local_response(user_message, classification, max_tokens)
+            
+            # Calculate response time
+            response_time = time.time() - start_time
+            
+            # Estimate tokens used (rough calculation)
+            tokens_used = len(ai_response.split()) * 1.3  # Rough estimation
+            
+            logger.info(f"Generated cybersecurity response in {response_time:.2f}s, tokens: {tokens_used:.0f}")
+            
+            return {
+                'response': ai_response,
+                'response_time': response_time,
+                'tokens_used': int(tokens_used),
+                'model_name': self.openai_model if self.use_openai else self.model_name,
+                'classification': classification,
+                'is_cybersecurity': True
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating response: {str(e)}")
+            raise
+    
+    def _generate_openai_response(self, user_message: str, classification: Dict[str, Any], max_tokens: Optional[int] = None) -> str:
+        """Generate response using OpenAI API"""
+        try:
+            # Get cybersecurity-specific prompt
+            prompt = cybersecurity_classifier.get_cybersecurity_prompt(
+                user_message, 
+                classification.get('primary_category', 'general')
+            )
+            
+            max_new_tokens = max_tokens or self.max_new_tokens
+            
+            response = self.openai_client.chat.completions.create(
+                model=self.openai_model,
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": user_message}
+                ],
+                max_tokens=max_new_tokens,
+                temperature=0.7,
+                top_p=0.95
+            )
+            
+            return response.choices[0].message.content.strip()
+            
+        except Exception as e:
+            logger.error(f"Error generating OpenAI response: {str(e)}")
+            raise
+    
+    def _generate_local_response(self, user_message: str, classification: Dict[str, Any], max_tokens: Optional[int] = None) -> str:
+        """Generate response using local model"""
+        try:
+            # Get cybersecurity-specific prompt
+            prompt = cybersecurity_classifier.get_cybersecurity_prompt(
+                user_message, 
+                classification.get('primary_category', 'general')
+            )
+            
             max_new_tokens = max_tokens or self.max_new_tokens
             
             output = self.pipe(
@@ -75,50 +175,20 @@ class AIService:
             # Remove the original prompt from the response
             ai_response = generated_text[len(prompt):].strip()
             
-            # Calculate response time
-            response_time = time.time() - start_time
-            
-            # Estimate tokens used (rough calculation)
-            tokens_used = len(ai_response.split()) * 1.3  # Rough estimation
-            
-            logger.info(f"Generated response in {response_time:.2f}s, tokens: {tokens_used:.0f}")
-            
-            return {
-                'response': ai_response,
-                'response_time': response_time,
-                'tokens_used': int(tokens_used),
-                'model_name': self.model_name
-            }
+            return ai_response
             
         except Exception as e:
-            logger.error(f"Error generating response: {str(e)}")
+            logger.error(f"Error generating local response: {str(e)}")
             raise
-    
-    def _prepare_prompt(self, user_message: str) -> str:
-        """
-        Prepare the prompt for the AI model
-        
-        Args:
-            user_message: The user's input message
-            
-        Returns:
-            Formatted prompt string
-        """
-        # For DeepSeek models, use their specific prompt format
-        if "deepseek" in self.model_name.lower():
-            prompt = f"<|im_start|>user\n{user_message}<|im_end|>\n<|im_start|>assistant\n"
-        else:
-            # Generic prompt format
-            prompt = f"User: {user_message}\nAssistant: "
-        
-        return prompt
     
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about the current model"""
         return {
-            'model_name': self.model_name,
+            'model_name': self.openai_model if self.use_openai else self.model_name,
             'max_tokens': self.max_new_tokens,
-            'is_loaded': self.pipe is not None
+            'is_loaded': True,
+            'provider': 'OpenAI' if self.use_openai else 'Local',
+            'use_openai': self.use_openai
         }
 
 

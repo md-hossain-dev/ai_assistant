@@ -127,8 +127,8 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # AI Model settings
-AI_MODEL_NAME = os.getenv('AI_MODEL_NAME', 'deepseek-ai/deepseek-coder-6.7b-instruct')
-MAX_NEW_TOKENS = int(os.getenv('MAX_NEW_TOKENS', '300'))
+AI_MODEL_NAME = os.getenv('AI_MODEL_NAME', 'microsoft/DialoGPT-medium')  # Smaller model
+MAX_NEW_TOKENS = int(os.getenv('MAX_NEW_TOKENS', '150'))  # Reduced tokens
 
 # Logging configuration
 LOGGING = {

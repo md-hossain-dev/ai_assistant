@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - DeepSeek</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    <title>Cybersecurity AI Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -30,11 +26,23 @@
         }
         
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
             padding: 20px;
             border-radius: 20px 20px 0 0;
             text-align: center;
+        }
+        
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .chat-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
         }
         
         .chat-messages {
@@ -45,7 +53,7 @@
         }
         
         .message {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
         }
@@ -54,11 +62,14 @@
             justify-content: flex-end;
         }
         
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
         .message-content {
             max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            position: relative;
+            padding: 12px 16px;
+            border-radius: 18px;
             word-wrap: break-word;
         }
         
@@ -68,35 +79,29 @@
             border-bottom-right-radius: 5px;
         }
         
-        .message.ai .message-content {
+        .message.assistant .message-content {
             background: white;
+            color: #333;
             border: 1px solid #e9ecef;
             border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-size: 18px;
+        .message.assistant.cybersecurity .message-content {
+            border-left: 4px solid #28a745;
         }
         
-        .user-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .message.assistant.non-cybersecurity .message-content {
+            border-left: 4px solid #dc3545;
         }
         
-        .ai-avatar {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 5px;
         }
         
-        .chat-input {
+        .chat-input-container {
             padding: 20px;
             background: white;
             border-radius: 0 0 20px 20px;
@@ -110,8 +115,8 @@
         .form-control {
             border-radius: 25px;
             border: 2px solid #e9ecef;
-            padding: 15px 20px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
         
@@ -127,12 +132,12 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            font-size: 18px;
+            font-size: 1.2rem;
             transition: all 0.3s ease;
         }
         
         .btn-send:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
@@ -143,24 +148,24 @@
         
         .typing-indicator {
             display: none;
-            padding: 15px 20px;
+            padding: 12px 16px;
             background: white;
-            border-radius: 20px;
+            border-radius: 18px;
             border: 1px solid #e9ecef;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             max-width: 70%;
         }
         
         .typing-dots {
             display: flex;
-            gap: 5px;
+            gap: 4px;
         }
         
         .typing-dot {
             width: 8px;
             height: 8px;
-            border-radius: 50%;
             background: #667eea;
+            border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
         
@@ -172,35 +177,63 @@
             40% { transform: scale(1); }
         }
         
-        .status-bar {
+        .classification-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .classification-cybersecurity {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .classification-non-cybersecurity {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            transition: width 0.3s ease;
+        }
+        
+        .stats-container {
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            border-radius: 0 0 20px 20px;
-            font-size: 12px;
-            color: #6c757d;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
             text-align: center;
         }
         
-        .scroll-to-bottom {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            font-size: 18px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .stat-item {
+            display: inline-block;
+            margin: 0 15px;
         }
         
-        .scroll-to-bottom:hover {
-            transform: scale(1.1);
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -208,216 +241,245 @@
     <div class="container-fluid">
         <div class="chat-container">
             <div class="chat-header">
-                <h2><i class="fas fa-robot me-2"></i>AI Assistant</h2>
-                <p class="mb-0">Powered by DeepSeek AI</p>
+                <h1><i class="fas fa-shield-alt"></i> Cybersecurity AI Assistant</h1>
+                <p>Your expert guide for malware removal and security issues</p>
             </div>
             
             <div class="chat-messages" id="chatMessages">
-                <div class="message ai">
-                    <div class="message-avatar ai-avatar">
-                        <i class="fas fa-robot"></i>
+                <div class="stats-container" id="statsContainer" style="display: none;">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalQueries">0</div>
+                        <div class="stat-label">Total Queries</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cybersecurityQueries">0</div>
+                        <div class="stat-label">Cybersecurity</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cybersecurityPercentage">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+                
+                <div class="message assistant">
                     <div class="message-content">
-                        <strong>AI Assistant:</strong><br>
-                        Hello! I'm your AI assistant powered by DeepSeek. How can I help you today? You can ask me questions about programming, general knowledge, or anything else you'd like to discuss.
+                        <i class="fas fa-shield-alt"></i> Hello! I'm your Cybersecurity AI Assistant. I can help you with:
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Malware detection and removal</li>
+                            <li>Security best practices</li>
+                            <li>System protection advice</li>
+                            <li>Network security guidance</li>
+                            <li>Privacy protection tips</li>
+                        </ul>
+                        Please ask me any cybersecurity-related questions!
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
                     </div>
                 </div>
             </div>
             
-            <div class="typing-indicator" id="typingIndicator">
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            </div>
-            
-            <div class="chat-input">
+            <div class="chat-input-container">
                 <div class="input-group">
                     <input type="text" class="form-control" id="messageInput" 
-                           placeholder="Type your message here..." 
-                           onkeypress="handleKeyPress(event)">
-                    <button class="btn btn-send" onclick="sendMessage()" id="sendButton">
+                           placeholder="Ask me about cybersecurity, malware removal, or security issues..."
+                           autocomplete="off">
+                    <button class="btn btn-send" id="sendButton" type="button">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
-            
-            <div class="status-bar">
-                <span id="statusText">Ready to chat</span>
-                <span class="ms-3">Session: <span id="sessionId">-</span></span>
-            </div>
         </div>
     </div>
-    
-    <button class="scroll-to-bottom" id="scrollToBottom" onclick="scrollToBottom()">
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let sessionId = null;
-        let isTyping = false;
-        
-        // Initialize session
-        function initializeSession() {
-            sessionId = localStorage.getItem('sessionId');
-            if (!sessionId) {
-                sessionId = generateSessionId();
-                localStorage.setItem('sessionId', sessionId);
-            }
-            document.getElementById('sessionId').textContent = sessionId.substring(0, 8) + '...';
-        }
-        
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-        
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-        
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message || isTyping) return;
-            
-            // Add user message to chat
-            addMessage(message, 'user');
-            input.value = '';
-            
-            // Show typing indicator
-            showTypingIndicator();
-            
-            // Send to API
-            fetch('/api/chat/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    message: message,
-                    session_id: sessionId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideTypingIndicator();
+        class CybersecurityChat {
+            constructor() {
+                this.sessionId = this.generateSessionId();
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                this.statsContainer = document.getElementById('statsContainer');
                 
-                if (data.error) {
-                    addMessage('Sorry, I encountered an error: ' + data.error, 'ai');
-                } else {
-                    addMessage(data.response, 'ai');
-                    updateStatus(`Response time: ${data.response_time.toFixed(2)}s | Tokens: ${data.tokens_used}`);
-                }
-            })
-            .catch(error => {
-                hideTypingIndicator();
-                addMessage('Sorry, I encountered an error. Please try again.', 'ai');
-                console.error('Error:', error);
-            });
-        }
-        
-        function addMessage(content, sender) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = `message-avatar ${sender}-avatar`;
-            avatar.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-            
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            
-            if (sender === 'user') {
-                messageContent.innerHTML = `<strong>You:</strong><br>${escapeHtml(content)}`;
-            } else {
-                messageContent.innerHTML = `<strong>AI Assistant:</strong><br>${formatResponse(content)}`;
+                this.totalQueries = 0;
+                this.cybersecurityQueries = 0;
+                
+                this.setupEventListeners();
+                this.loadStats();
             }
             
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(messageContent);
-            chatMessages.appendChild(messageDiv);
+            generateSessionId() {
+                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
             
-            scrollToBottom();
-        }
-        
-        function formatResponse(text) {
-            // Convert markdown-like formatting to HTML
-            return escapeHtml(text)
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/\n/g, '<br>');
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function showTypingIndicator() {
-            isTyping = true;
-            document.getElementById('typingIndicator').style.display = 'block';
-            document.getElementById('sendButton').disabled = true;
-            updateStatus('AI is thinking...');
-            scrollToBottom();
-        }
-        
-        function hideTypingIndicator() {
-            isTyping = false;
-            document.getElementById('typingIndicator').style.display = 'none';
-            document.getElementById('sendButton').disabled = false;
-            updateStatus('Ready to chat');
-        }
-        
-        function updateStatus(text) {
-            document.getElementById('statusText').textContent = text;
-        }
-        
-        function scrollToBottom() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+            setupEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+                
+                this.messageInput.addEventListener('input', () => {
+                    this.sendButton.disabled = !this.messageInput.value.trim();
+                });
+            }
+            
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.sendButton.disabled = true;
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                try {
+                    const response = await this.callAPI('/api/chat/', {
+                        message: message,
+                        session_id: this.sessionId
+                    });
+                    
+                    // Hide typing indicator
+                    this.hideTypingIndicator();
+                    
+                    // Add AI response to chat
+                    this.addMessage(response.response, 'assistant', response.is_cybersecurity);
+                    
+                    // Update stats
+                    this.totalQueries++;
+                    if (response.is_cybersecurity) {
+                        this.cybersecurityQueries++;
+                    }
+                    this.updateStats();
+                    
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    this.addMessage('Sorry, I encountered an error. Please try again.', 'assistant', false);
+                    console.error('Error:', error);
+                }
+            }
+            
+            addMessage(content, sender, isCybersecurity = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                if (sender === 'assistant' && isCybersecurity !== null) {
+                    messageDiv.classList.add(isCybersecurity ? 'cybersecurity' : 'non-cybersecurity');
+                }
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                
+                // Add classification badge for assistant messages
+                if (sender === 'assistant' && isCybersecurity !== null) {
+                    const badge = document.createElement('span');
+                    badge.className = `classification-badge classification-${isCybersecurity ? 'cybersecurity' : 'non-cybersecurity'}`;
+                    badge.textContent = isCybersecurity ? 'Cybersecurity' : 'Non-Cybersecurity';
+                    messageContent.appendChild(badge);
+                    messageContent.appendChild(document.createElement('br'));
+                }
+                
+                messageContent.innerHTML += content;
+                
+                // Add timestamp
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString();
+                messageContent.appendChild(timeDiv);
+                
+                messageDiv.appendChild(messageContent);
+                
+                // Insert before typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                this.chatMessages.insertBefore(messageDiv, typingIndicator);
+                
+                // Scroll to bottom
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            showTypingIndicator() {
+                this.typingIndicator.style.display = 'block';
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+            
+            async callAPI(endpoint, data) {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCSRFToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+            
+            getCSRFToken() {
+                const name = 'csrftoken';
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
                     }
                 }
+                return cookieValue;
             }
-            return cookieValue;
+            
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/stats/?days=30');
+                    const stats = await response.json();
+                    
+                    this.totalQueries = stats.total_conversations;
+                    this.cybersecurityQueries = stats.estimated_cybersecurity_conversations;
+                    this.updateStats();
+                    
+                    if (this.totalQueries > 0) {
+                        this.statsContainer.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+            
+            updateStats() {
+                document.getElementById('totalQueries').textContent = this.totalQueries;
+                document.getElementById('cybersecurityQueries').textContent = this.cybersecurityQueries;
+                
+                const percentage = this.totalQueries > 0 ? 
+                    Math.round((this.cybersecurityQueries / this.totalQueries) * 100) : 0;
+                document.getElementById('cybersecurityPercentage').textContent = percentage + '%';
+            }
         }
         
-        // Show/hide scroll to bottom button
-        document.getElementById('chatMessages').addEventListener('scroll', function() {
-            const scrollButton = document.getElementById('scrollToBottom');
-            if (this.scrollTop > 100) {
-                scrollButton.style.display = 'flex';
-            } else {
-                scrollButton.style.display = 'none';
-            }
-        });
-        
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeSession();
-            updateStatus('Ready to chat');
+        // Initialize the chat when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CybersecurityChat();
         });
     </script>
 </body>
